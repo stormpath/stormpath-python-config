@@ -1,0 +1,24 @@
+---
+client:
+  apiKey:
+    file: null
+    id: "MY_CONFIG_API_KEY_ID"
+    secret: "MY_CONFIG_API_KEY_SECRET"
+  cacheManager:
+    defaultTtl: 301
+    defaultTti: 301
+    caches:
+      account:
+        ttl: 301
+        tti: 301
+  baseUrl: "https://api.stormpath.com/v2"
+  connectionTimeout: null
+  authenticationScheme: "SAUTHC2"
+  proxy:
+    port: null
+    host: null
+    username: null
+    password: null
+application:
+  name: 'MY_APP'
+  href: null

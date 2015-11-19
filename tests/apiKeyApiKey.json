@@ -1,0 +1,6 @@
+{
+    "apiKey": {
+        "id": "MY_JSON_CONFIG_API_KEY_ID",
+        "secret": "MY_JSON_CONFIG_API_KEY_SECRET"
+    }
+}

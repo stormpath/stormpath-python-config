@@ -1,0 +1,32 @@
+{
+  "client": {
+    "apiKey": {
+      "file": 'apiKey.properties',
+      "id": "MY_JSON_CONFIG_API_KEY_ID",
+      "secret": "MY_JSON_CONFIG_API_KEY_SECRET"
+    },
+    "cacheManager": {
+      "defaultTtl": 302,
+      "defaultTti": 302,
+      "caches": {
+        "account": {
+          "ttl": 302,
+          "tti": 302
+        }
+      }
+    },
+    "baseUrl": "https://api.stormpath.com/v3",
+    "connectionTimeout": null,
+    "authenticationScheme": "SAUTHC3",
+    "proxy": {
+      "port": null,
+      "host": null,
+      "username": null,
+      "password": null
+    }
+  },
+  "application": {
+    "name": "MY_JSON_APP",
+    "href": null
+  }
+}

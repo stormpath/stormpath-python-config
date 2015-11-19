@@ -1,0 +1,6 @@
+---
+client:
+  apiKey:
+    file: apiKey.properties
+    id: null
+    secret: null
