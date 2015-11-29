@@ -24,13 +24,25 @@ def _load_properties(fname):
         return {}
 
 
-class LoadFileConfigStrategy(object):
-    """Represents a strategy that loads configuration from either a
-    JSON or YAML file into the configuration.
+def _extend_dict(original, extend_with):
+    for key, value in extend_with.items():
+        if key in original and isinstance(value, dict):
+            _extend_dict(original[key], value)
+        else:
+            original[key] = value
+    return original
+
+
+class LoadFilePathStrategy(object):
+    """Base class for all strategies that load configuration from a
+    file.
     """
     def __init__(self, file_path, must_exist=False):
         self.file_path = os.path.expanduser(file_path)
         self.must_exist = must_exist
+
+    def _process_file_path(self, config):
+        raise NotImplementedError('Subclasses must implement this method.')
 
     def process(self, config=None):
         if config is None:
@@ -42,6 +54,14 @@ class LoadFileConfigStrategy(object):
                     "Config file '" + self.file_path + "' doesn't exist.")
             return config
 
+        return self._process_file_path(config)
+
+
+class LoadFileConfigStrategy(LoadFilePathStrategy):
+    """Represents a strategy that loads configuration from either a
+    JSON or YAML file into the configuration.
+    """
+    def _process_file_path(self, config):
         f = open(self.file_path, 'r')
         try:
             loaded_config = yaml.load(f.read())
@@ -50,29 +70,14 @@ class LoadFileConfigStrategy(object):
                 "Error parsing file %s.\nDetails: %s" % (
                     self.file_path, e.message))
 
-        config.update(loaded_config)
-        return config
+        return _extend_dict(config, loaded_config)
 
 
-class LoadAPIKeyConfigStrategy(object):
+class LoadAPIKeyConfigStrategy(LoadFilePathStrategy):
     """Represents a strategy that loads API keys from a .properties
     file into the configuration.
     """
-
-    def __init__(self, file_path, must_exist=False):
-        self.file_path = os.path.expanduser(file_path)
-        self.must_exist = must_exist
-
-    def process(self, config=None):
-        if config is None:
-            config = {}
-
-        if not os.path.exists(self.file_path):
-            if self.must_exist:
-                raise Exception(
-                    "Config file %s doesn't exist." % self.file_path)
-            return config
-
+    def _process_file_path(self, config):
         try:
             properties_config = _load_properties(self.file_path)
         except Exception as e:
@@ -112,7 +117,10 @@ class LoadEnvConfigStrategy(object):
             aliases = {}
         self.aliases = aliases
 
-    def process(self, config):
+    def process(self, config=None):
+        if config is None:
+            config = {}
+
         config = flatdict.FlatDict(config, delimiter='_')
         environ_config = {}
 
@@ -124,7 +132,7 @@ class LoadEnvConfigStrategy(object):
                 if isinstance(config[key], int):
                     value = int(value)
                 environ_config[key] = value
-        config.update(environ_config)
+        _extend_dict(config, environ_config)
 
         config = config.as_dict()
         return config
@@ -135,23 +143,26 @@ class ExtendConfigStrategy(object):
     def __init__(self, extend_with):
         self.extend_with = extend_with
 
-    def process(self, config):
+    def process(self, config=None):
         if config is None:
             config = {}
 
-        config.update(self.extend_with)
-        return config
+        return _extend_dict(config, self.extend_with)
 
 
 class LoadAPIKeyFromConfigStrategy(object):
     """Represents a strategy that loads an API key specified in config
     into the configuration.
     """
-    def process(self, config):
+    def process(self, config=None):
+        if config is None:
+            config = {}
+
         api_key_file = config.get('client', {}).get('apiKey', {}).get('file')
         if api_key_file:
             lakcs = LoadAPIKeyConfigStrategy(api_key_file, True)
-            return lakcs.process(config)
+            config = lakcs.process(config)
+            del config['client']['apiKey']['file']
 
         return config
 
@@ -160,14 +171,17 @@ class MoveAPIKeyToClientAPIKeyStrategy(object):
     """Represents a strategy that moves an API key from apiKey to
     client.apiKey.
     """
+    def process(self, config=None):
+        if config is None:
+            config = {}
 
-    def process(self, config):
         apiKey = config.get('apiKey', {})
 
         if apiKey:
             config.setdefault('client', {})
             config['client'].setdefault('apiKey', {})
             config['client']['apiKey'] = apiKey
+            del config['apiKey']
 
         return config
 
@@ -177,7 +191,10 @@ class ValidateClientConfigStrategy(object):
     (post loading).
     """
 
-    def process(self, config):
+    def process(self, config=None):
+        if config is None:
+            config = {}
+
         if not config:
             raise ValueError('Configuration not instantiated.')
 
