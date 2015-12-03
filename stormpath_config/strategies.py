@@ -278,6 +278,9 @@ class EnrichClientFromRemoteConfigStrategy(object):
 
         for app in client.applications:
             if app.name != 'Stormpath':
+                # Check if we have already found non-Stormpath app.
+                # If there is more than one non-Stormpath app, we can't
+                # resolve any of them as default application.
                 if default_app is not None:
                     raise Exception(message)
                 default_app = app
