@@ -22,12 +22,14 @@ class Applications(object):
         for app in self.apps:
             if app.href == href:
                 return app
+
         raise StormpathError("I don't exist", http_status=404)
 
     def query(self, name):
         for app in self.apps:
             if app.name == name:
                 return [app]
+
         return []
 
     def __iter__(self):

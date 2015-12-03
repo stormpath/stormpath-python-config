@@ -23,8 +23,8 @@ class ConfigLoader(object):
             config = strategy.process(config)
             for strategy in self.post_processing_strategies:
                 config = strategy.process(config)
+
         for strategy in self.validation_strategies:
             config = strategy.process(config)
 
         return config
-

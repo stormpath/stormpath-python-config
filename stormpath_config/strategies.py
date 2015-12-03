@@ -259,7 +259,6 @@ class EnrichClientFromRemoteConfigStrategy(object):
         config['application'] = app
         return app
 
-
     def _resolve_default_application(self, client, config):
         """If there are only two applications and one of them is the
         Stormpath application, then use the other one as default.
