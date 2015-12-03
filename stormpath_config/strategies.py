@@ -240,8 +240,11 @@ class EnrichClientFromRemoteConfigStrategy(object):
                 raise Exception(
                     'The provided application could not be found. '
                     'The provided application href was: %s' % href)
-            else:
-                raise
+            raise Exception(
+                'Exception was raised while trying to resolve an application. '
+                'The provided application href was: %s. '
+                'Exception message was: %s' % (href, e.message))
+
         config['application'] = app
         return app
 
@@ -256,6 +259,12 @@ class EnrichClientFromRemoteConfigStrategy(object):
             raise Exception(
                 'The provided application could not be found. '
                 'The provided application name was: %s' % name)
+        except Exception as e:
+            raise Exception(
+                'Exception was raised while trying to resolve an application. '
+                'The provided application name was: %s. '
+                'Exception message was: %s' % (name, e.message))
+
         config['application'] = app
         return app
 
