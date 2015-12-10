@@ -413,7 +413,13 @@ class EnrichClientFromRemoteConfigStrategyTest(TestCase):
             client_factory=_create_client_from_config)
 
         ecfrcs.process(config)
-        self.assertEqual(config['application'], self.application)
+        self.assertIsInstance(config['application'], dict)
+        self.assertEqual(
+            config['application'],
+            {
+                'href': 'https://api.stormpath.com/v1/applications/a',
+                'name': 'My named application'
+            })
 
     def test_enrich_client_from_remote_config_app_by_invalid_name(self):
         def _create_client_from_config(config):
@@ -445,7 +451,13 @@ class EnrichClientFromRemoteConfigStrategyTest(TestCase):
             client_factory=_create_client_from_config)
 
         ecfrcs.process(config)
-        self.assertEqual(config['application'], self.application)
+        self.assertIsInstance(config['application'], dict)
+        self.assertEqual(
+            config['application'],
+            {
+                'href': 'https://api.stormpath.com/v1/applications/a',
+                'name': 'My named application',
+            })
 
     def test_enrich_client_from_remote_config_default_app_no_app(self):
         def _create_client_from_config(config):
@@ -488,7 +500,13 @@ class EnrichClientFromRemoteConfigStrategyTest(TestCase):
             client_factory=_create_client_from_config)
         ecfrcs.process(config)
 
-        self.assertEqual(config['application'], self.application)
+        self.assertIsInstance(config['application'], dict)
+        self.assertEqual(
+            config['application'],
+            {
+                'href': 'https://api.stormpath.com/v1/applications/a',
+                'name': 'My named application',
+            })
 
 
 class EnrichIntegrationConfigStrategyTest(TestCase):
@@ -535,7 +553,7 @@ class EnrichIntegrationConfigStrategyTest(TestCase):
 
     def test_enrich_client_from_integration_config_user_config_feature(self):
         config = {'website': True, 'client': {'k': 'v'}}
-        user_config = {'web': {'register': {'k': 'v'}}}
+        user_config = {'web': {'register': {'enabled': True}}}
 
         eics = EnrichIntegrationConfigStrategy(user_config)
         eics.process(config)
@@ -545,7 +563,6 @@ class EnrichIntegrationConfigStrategyTest(TestCase):
                 'website': True,
                 'client': {'k': 'v'},
                 'web': {
-                    'register': {'enabled': True},
                     'login': {'enabled': True},
                     'logout': {'enabled': True},
                     'me': {'enabled': True},
@@ -557,7 +574,7 @@ class EnrichIntegrationConfigStrategyTest(TestCase):
         config = {'website': True, 'client': {'k': 'v'}}
         user_config = {
             'web': {
-                'register': {'enabled': True, 'uri': '/users-register-uri'}
+                'register': {'enabled': False}
             }
         }
 

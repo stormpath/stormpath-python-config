@@ -245,7 +245,7 @@ class EnrichClientFromRemoteConfigStrategy(object):
                 'The provided application href was: %s. '
                 'Exception message was: %s' % (href, e.message))
 
-        config['application'] = app
+        config['application']['name'] = app.name
         return app
 
     def _resolve_application_by_name(self, client, config, name):
@@ -254,7 +254,6 @@ class EnrichClientFromRemoteConfigStrategy(object):
         """
         try:
             app = client.applications.query(name=name)[0]
-            app.name
         except IndexError:
             raise Exception(
                 'The provided application could not be found. '
@@ -265,7 +264,7 @@ class EnrichClientFromRemoteConfigStrategy(object):
                 'The provided application name was: %s. '
                 'Exception message was: %s' % (name, e.message))
 
-        config['application'] = app
+        config['application']['href'] = app.href
         return app
 
     def _resolve_default_application(self, client, config):
@@ -288,7 +287,8 @@ class EnrichClientFromRemoteConfigStrategy(object):
         if default_app is None:
             raise Exception(message)
 
-        config['application'] = default_app
+        config['application']['name'] = default_app.name
+        config['application']['href'] = default_app.href
         return default_app
 
     def process(self, config):
@@ -341,8 +341,9 @@ class EnrichIntegrationConfigStrategy(object):
             web_features_to_enable.add('oauth2')
 
         user_configured_features = {
-            feature.key() for feature in
-            self.user_config.get('web', {}).items() if 'enabled' in feature
+            feature for feature, definition in
+            self.user_config.get('web', {}).items()
+            if 'enabled' in definition
         }
         web_features = {
             feature: {'enabled': True}
