@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from base import *
+from .base import *
 from stormpath_config.loader import ConfigLoader
 from stormpath_config.strategies import *
 from stormpath_config.strategies import _extend_dict
@@ -35,13 +35,13 @@ class ExtendDictTest(TestCase):
 
 class LoadFileConfigStrategyTest(TestCase):
     def test_load_file_config(self):
-        lfcs = LoadFileConfigStrategy('default_config.yml')
+        lfcs = LoadFileConfigStrategy('tests/default_config.yml')
         config = lfcs.process()
 
         self.assertEqual(config['client']['cacheManager']['defaultTtl'], 300)
 
     def test_load_file_config_with_existing_config(self):
-        lfcs = LoadFileConfigStrategy('stormpath.yml', must_exist=False)
+        lfcs = LoadFileConfigStrategy('tests/stormpath.yml', must_exist=False)
         existing_config = {'application': {'name': 'App Name'}, 'key': 'value'}
         config = lfcs.process(existing_config)
 
@@ -50,7 +50,8 @@ class LoadFileConfigStrategyTest(TestCase):
         self.assertEqual(config['key'], 'value')
 
     def test_load_non_existent_file_config_with_existing_config(self):
-        lfcs = LoadFileConfigStrategy('i-do-not-exist.yml', must_exist=False)
+        lfcs = LoadFileConfigStrategy(
+            'tests/i-do-not-exist.yml', must_exist=False)
         existing_config = {'application': {'name': 'App Name'}, 'key': 'value'}
         config = lfcs.process(existing_config)
 
@@ -59,7 +60,7 @@ class LoadFileConfigStrategyTest(TestCase):
 
     def test_load_file_json_config_with_existing_config(self):
         config = {'application': {'name': 'App Name'}, 'key': 'value'}
-        lfcs = LoadFileConfigStrategy('stormpath.json')
+        lfcs = LoadFileConfigStrategy('tests/stormpath.json')
         config = lfcs.process(config)
         self.assertEqual(config['client']['cacheManager']['defaultTtl'], 302)
         self.assertEqual(
@@ -74,7 +75,7 @@ class LoadFileConfigStrategyTest(TestCase):
 
 class LoadAPIKeyConfigStrategyTest(TestCase):
     def test_load_api_key_config(self):
-        lapcs = LoadAPIKeyConfigStrategy('apiKey.properties')
+        lapcs = LoadAPIKeyConfigStrategy('tests/apiKey.properties')
         config = lapcs.process()
 
         self.assertEqual(
@@ -83,22 +84,22 @@ class LoadAPIKeyConfigStrategyTest(TestCase):
             config['client']['apiKey']['secret'], 'API_KEY_PROPERTIES_SECRET')
 
     def test_load_empty_api_key_config(self):
-        lapcs = LoadAPIKeyConfigStrategy('empty_apiKey.properties')
+        lapcs = LoadAPIKeyConfigStrategy('tests/empty_apiKey.properties')
         config = lapcs.process()
 
         self.assertEqual(config, {})
 
     def test_load_empty_api_key_config_must_exist(self):
         lapcs = LoadAPIKeyConfigStrategy(
-            'empty_apiKey.properties', must_exist=True)
+            'tests/empty_apiKey.properties', must_exist=True)
 
         with self.assertRaises(Exception):
             lapcs.process()
 
     def test_api_key_properties_file_after_default_config(self):
-        lfcs = LoadFileConfigStrategy('default_config.yml')
+        lfcs = LoadFileConfigStrategy('tests/default_config.yml')
         config = lfcs.process()
-        lapcs = LoadAPIKeyConfigStrategy('apiKey.properties')
+        lapcs = LoadAPIKeyConfigStrategy('tests/apiKey.properties')
         returned_config = lapcs.process(config)
 
         self.assertEqual(returned_config, config)
@@ -109,9 +110,9 @@ class LoadAPIKeyConfigStrategyTest(TestCase):
             config['client']['apiKey']['secret'], 'API_KEY_PROPERTIES_SECRET')
 
     def test_empty_api_key_properties_file_after_default_config(self):
-        lfcs = LoadFileConfigStrategy('default_config.yml')
+        lfcs = LoadFileConfigStrategy('tests/default_config.yml')
         config = lfcs.process()
-        lapcs = LoadAPIKeyConfigStrategy('empty_apiKey.properties')
+        lapcs = LoadAPIKeyConfigStrategy('tests/empty_apiKey.properties')
         returned_config = lapcs.process(config)
 
         self.assertEqual(returned_config, config)
@@ -194,21 +195,21 @@ class ConfigLoaderTest(TestCase):
 
         self.load_strategies = [
             # 1. Default configuration.
-            LoadFileConfigStrategy('default_config.yml', must_exist=True),
+            LoadFileConfigStrategy('tests/default_config.yml', must_exist=True),
 
             # 2. apiKey.properties file from ~/.stormpath directory.
-            LoadAPIKeyConfigStrategy('apiKey.properties'),
+            LoadAPIKeyConfigStrategy('tests/apiKey.properties'),
 
             # 3. stormpath.[json or yaml] file from ~/.stormpath
             #    directory.
-            LoadFileConfigStrategy('stormpath.yml'),
+            LoadFileConfigStrategy('tests/stormpath.yml'),
 
             # 4. apiKey.properties file from application directory.
-            LoadAPIKeyConfigStrategy('no_apiKey.properties'),
+            LoadAPIKeyConfigStrategy('tests/no_apiKey.properties'),
 
             # 5. stormpath.[json or yaml] file from application
             #    directory.
-            LoadFileConfigStrategy('stormpath.json'),
+            LoadFileConfigStrategy('tests/stormpath.json'),
 
             # 6. Environment variables.
             LoadEnvConfigStrategy(prefix='STORMPATH'),
@@ -266,7 +267,7 @@ class EdgeCasesTest(TestCase):
 
         load_strategies = [
             # 1. We load the default configuration.
-            LoadFileConfigStrategy('default_config.yml', must_exist=True),
+            LoadFileConfigStrategy('tests/default_config.yml', must_exist=True),
             LoadAPIKeyConfigStrategy('i-do-not-exist'),
             LoadFileConfigStrategy('i-do-not-exist'),
             LoadAPIKeyConfigStrategy('i-do-not-exist'),
@@ -301,10 +302,10 @@ class EdgeCasesTest(TestCase):
 
         load_strategies = [
             # 1. We load the default configuration.
-            LoadFileConfigStrategy('default_config.yml', must_exist=True),
+            LoadFileConfigStrategy('tests/default_config.yml', must_exist=True),
             LoadAPIKeyConfigStrategy('i-do-not-exist'),
             # 3. We load stormpath.yml file with client.apiKey.file
-            LoadFileConfigStrategy('apiKeyFile.yml'),
+            LoadFileConfigStrategy('tests/apiKeyFile.yml'),
             LoadAPIKeyConfigStrategy('i-do-not-exist'),
             LoadFileConfigStrategy('i-do-not-exist'),
             # 6. We load API key id and secret from environment
@@ -344,10 +345,10 @@ class EdgeCasesTest(TestCase):
 
         load_strategies = [
             # 1. We load the default configuration.
-            LoadFileConfigStrategy('default_config.yml', must_exist=True),
+            LoadFileConfigStrategy('tests/default_config.yml', must_exist=True),
             LoadAPIKeyConfigStrategy('i-do-not-exist'),
             # 3. We load stormpath.yml file with client.apiKey.file
-            LoadFileConfigStrategy('apiKeyApiKey.json'),
+            LoadFileConfigStrategy('tests/apiKeyApiKey.json'),
             LoadAPIKeyConfigStrategy('i-do-not-exist'),
             LoadFileConfigStrategy('i-do-not-exist'),
             LoadEnvConfigStrategy(prefix='STORMPATH'),
