@@ -1,6 +1,6 @@
 ---
 client:
   apiKey:
-    file: apiKey.properties
+    file: tests/apiKey.properties
     id: null
     secret: null

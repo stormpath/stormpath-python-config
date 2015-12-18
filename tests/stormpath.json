@@ -1,7 +1,7 @@
 {
   "client": {
     "apiKey": {
-      "file": 'apiKey.properties',
+      "file": 'tests/apiKey.properties',
       "id": "MY_JSON_CONFIG_API_KEY_ID",
       "secret": "MY_JSON_CONFIG_API_KEY_SECRET"
     },
