@@ -418,8 +418,10 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
         config.providers array which we'll use later on to dynamically
         populate all social login configurations.
         """
-        if 'socialProviders' not in config:
-            config['socialProviders'] = {}
+        if 'web' not in config:
+            config['web'] = {}
+        if 'social' not in config['web']:
+            config['web']['social'] = {}
 
         for account_store_mapping in application.account_store_mappings:
             # Iterate directories
@@ -441,13 +443,12 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
                     to_camel_case(k): v for k, v in remote_provider.items()
                 }
 
-                local_provider = config['socialProviders'].get(provider_id, {})
-                if 'callbackUri' not in local_provider:
-                    local_provider['callbackUri'] = \
-                        '/callbacks/%s' % provider_id
+                local_provider = config['web']['social'].get(provider_id, {})
+                if 'uri' not in local_provider:
+                    local_provider['uri'] = '/callbacks/%s' % provider_id
 
                 _extend_dict(local_provider, remote_provider)
-                config['socialProviders'][provider_id] = local_provider
+                config['web']['social'][provider_id] = local_provider
 
     def _resolve_directory(self, application):
         # Finds and returns an Application's default Account Store

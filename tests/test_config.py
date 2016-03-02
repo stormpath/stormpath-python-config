@@ -656,7 +656,7 @@ class EnrichIntegrationFromRemoteConfigStrategyTest(TestCase):
                 'maxLength': 100
             })
         self.assertEqual(
-            config['socialProviders'],
+            config['web']['social'],
             {
                 'google': {
                     'providerId': 'google',
@@ -664,16 +664,27 @@ class EnrichIntegrationFromRemoteConfigStrategyTest(TestCase):
                     'clientSecret': 'secret',
                     'enabled': True,
                     'spHttpStatus': 200,
-                    'callbackUri': '/callbacks/google',
+                    'uri': '/callbacks/google',
                     'redirectUri': 'https://myapplication.com/authenticate'
                 }
             })
         self.assertEqual(
             config['web'],
             {
-                'changePassword': { 'enabled': True },
-                'forgotPassword': { 'enabled': True },
-                'verifyEmail': { 'enabled': False },
+                'social': {
+                    'google': {
+                        'providerId': 'google',
+                        'clientId': 'id',
+                        'clientSecret': 'secret',
+                        'enabled': True,
+                        'spHttpStatus': 200,
+                        'uri': '/callbacks/google',
+                        'redirectUri': 'https://myapplication.com/authenticate'
+                    }
+                },
+                'changePassword': {'enabled': True},
+                'forgotPassword': {'enabled': True},
+                'verifyEmail': {'enabled': False},
             })
 
 
