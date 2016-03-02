@@ -97,6 +97,23 @@ class LoadAPIKeyConfigStrategyTest(TestCase):
         with self.assertRaises(Exception):
             lapcs.process()
 
+    def test_load_empty_api_key_config_must_exist_no_home_env(self):
+        path = '~/tests/empty_apiKey.properties'
+
+        with mock.patch(
+                'os.path.expanduser', mock.MagicMock(return_value=path)):
+            lapcs = LoadAPIKeyConfigStrategy(path, must_exist=True)
+            try:
+                lapcs.process()
+            except Exception as e:
+                self.assertEqual(
+                    str(e),
+                    'Unable to load "%s" . Environment home not set.' % path)
+            else:
+                self.fail(
+                    "Loading config without environment home didn't throw any "
+                    "exception.")
+
     def test_api_key_properties_file_after_default_config(self):
         lfcs = LoadFileConfigStrategy('tests/default_config.yml')
         config = lfcs.process()

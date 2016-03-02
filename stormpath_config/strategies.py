@@ -64,6 +64,13 @@ class LoadFilePathStrategy(object):
         if config is None:
             config = {}
 
+        if self.file_path.startswith('~'):
+            if self.must_exist:
+                raise Exception(
+                    'Unable to load "%s" . Environment home not set.' %
+                    self.file_path)
+            return config
+
         if not os.path.exists(self.file_path):
             if self.must_exist:
                 raise Exception(
