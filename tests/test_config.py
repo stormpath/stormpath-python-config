@@ -140,6 +140,14 @@ class LoadAPIKeyConfigStrategyTest(TestCase):
 
 
 class LoadEnvConfigStrategyTest(TestCase):
+    @mock.patch.dict(
+        os.environ,
+        {
+            "STORMPATH_CLIENT_APIKEY_ID": "env api key id",
+            "STORMPATH_ALIAS": "env api key secret",
+            "STORMPATH_CLIENT_CACHEMANAGER_DEFAULTTTI": "301",
+            "STORMPATH_APPLICATION_NAME": "env application name"
+        })
     def test_stormpath_config_environment(self):
         config = {
             'client': {
@@ -149,10 +157,7 @@ class LoadEnvConfigStrategyTest(TestCase):
             'application': {'name': 'App Name'},
             'key': ['value1', 'value2', 'value3']
         }
-        os.environ["STORMPATH_CLIENT_APIKEY_ID"] = "env api key id"
-        os.environ["STORMPATH_ALIAS"] = "env api key secret"
-        os.environ["STORMPATH_CLIENT_CACHEMANAGER_DEFAULTTTI"] = "301"
-        os.environ["STORMPATH_APPLICATION_NAME"] = "env application name"
+
         lecs = LoadEnvConfigStrategy(
             'STORMPATH', {"STORMPATH_CLIENT_APIKEY_SECRET": "STORMPATH_ALIAS"})
         config = lecs.process(config)
@@ -250,11 +255,15 @@ class ConfigLoaderTest(TestCase):
             # Post-processing: Validation
             ValidateClientConfigStrategy()
         ]
-        os.environ["STORMPATH_CLIENT_APIKEY_ID"] = "env api key id"
-        os.environ["STORMPATH_CLIENT_APIKEY_SECRET"] = "env api key secret"
-        os.environ["STORMPATH_CLIENT_CACHEMANAGER_DEFAULTTTI"] = "303"
-        os.environ["STORMPATH_APPLICATION_NAME"] = "My app"
 
+    @mock.patch.dict(
+        os.environ,
+        {
+            "STORMPATH_CLIENT_APIKEY_ID": "env api key id",
+            "STORMPATH_CLIENT_APIKEY_SECRET": "env api key secret",
+            "STORMPATH_CLIENT_CACHEMANAGER_DEFAULTTTI": "303",
+            "STORMPATH_APPLICATION_NAME": "My app"
+        })
     def test_config_loader(self):
         cl = ConfigLoader(
             self.load_strategies,
@@ -309,14 +318,18 @@ class EdgeCasesTest(TestCase):
 
         self.assertTrue('baseUrl' in config['client'])
 
+    @mock.patch.dict(
+        os.environ,
+        {
+            "STORMPATH_CLIENT_APIKEY_ID": "greater order id",
+            "STORMPATH_CLIENT_APIKEY_SECRET": "greater order secret"
+        })
     def test_api_key_file_from_config_with_lesser_loading_order(self):
         """Let's say we load the default configuration, and then
         stormpath.yml file with client.apiKey.file key. Then we provide
         API key ID and secret through environment variables - which
         have greater loading order than the stormpath.yml.
         """
-        os.environ["STORMPATH_CLIENT_APIKEY_ID"] = "greater order id"
-        os.environ["STORMPATH_CLIENT_APIKEY_SECRET"] = "greater order secret"
 
         load_strategies = [
             # 1. We load the default configuration.
