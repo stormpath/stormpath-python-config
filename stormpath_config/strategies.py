@@ -242,6 +242,14 @@ class ValidateClientConfigStrategy(object):
                 'Application HREF %s is not a valid Stormpath Application '
                 'HREF.' % href)
 
+        web_spa = config.get('web', {}).get('spa', {})
+        if web_spa and web_spa.get('enabled') and web_spa.get('view') is None:
+            raise ValueError(
+                "SPA mode is enabled but stormpath.web.spa.view isn't "
+                "set. This needs to be the absolute path to the file "
+                "that you want to serve as your SPA entry."
+            )
+
         return config
 
 
