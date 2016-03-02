@@ -1,3 +1,4 @@
+import mock
 import os
 from unittest import TestCase
 
@@ -657,3 +658,28 @@ class EnrichIntegrationFromRemoteConfigStrategyTest(TestCase):
                 'forgotPassword': { 'enabled': True },
                 'verifyEmail': { 'enabled': False },
             })
+
+
+class DebugConfigStrategyTest(TestCase):
+    def test_debug_config_strategy(self):
+        with mock.patch('stormpath_config.strategies.log') as log_mock:
+            dcs = DebugConfigStrategy(section='test')
+            config = dcs.process({'abc': '123'})
+            log_mock.debug.assert_called_with(
+                'test:\n{\n    "abc": "123"\n}\n')
+            self.assertEqual(config, {'abc': '123'})
+
+    def test_debug_config_strategy_without_section(self):
+        with mock.patch('stormpath_config.strategies.log') as log_mock:
+            dcs = DebugConfigStrategy()
+            config = dcs.process({'abc': '123'})
+            log_mock.debug.assert_called_with('{\n    "abc": "123"\n}\n')
+            self.assertEqual(config, {'abc': '123'})
+
+    def test_debug_config_strategy_with_custom_logger(self):
+        logger = logging.getLogger('my.custom.logger')
+        with mock.patch.object(logger, 'debug') as mock_debug:
+            dcs = DebugConfigStrategy(logger='my.custom.logger', section='sec')
+            config = dcs.process({'abc': '123'})
+            mock_debug.assert_called_with('sec:\n{\n    "abc": "123"\n}\n')
+            self.assertEqual(config, {'abc': '123'})
