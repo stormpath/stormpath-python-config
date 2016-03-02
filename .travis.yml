@@ -1,0 +1,16 @@
+language: python
+sudo: false
+python:
+  - '2.7'
+  - '3.3'
+  - '3.4'
+  - '3.5'
+  - pypy
+install: python setup.py develop
+before_script: python setup.py testdep
+script:
+  - python setup.py test
+branches:
+  only:
+    - master
+    - develop
