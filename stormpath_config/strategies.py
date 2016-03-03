@@ -1,8 +1,13 @@
 import codecs
 import datetime
 import flatdict
+import json
+import logging
 import os
 import yaml
+
+
+log = logging.getLogger(__name__)
 
 
 def _load_properties(fname):
@@ -58,6 +63,13 @@ class LoadFilePathStrategy(object):
     def process(self, config=None):
         if config is None:
             config = {}
+
+        if self.file_path.startswith('~'):
+            if self.must_exist:
+                raise Exception(
+                    'Unable to load "%s" . Environment home not set.' %
+                    self.file_path)
+            return config
 
         if not os.path.exists(self.file_path):
             if self.must_exist:
@@ -230,6 +242,14 @@ class ValidateClientConfigStrategy(object):
                 'Application HREF %s is not a valid Stormpath Application '
                 'HREF.' % href)
 
+        web_spa = config.get('web', {}).get('spa', {})
+        if web_spa and web_spa.get('enabled') and web_spa.get('view') is None:
+            raise ValueError(
+                "SPA mode is enabled but stormpath.web.spa.view isn't "
+                "set. This needs to be the absolute path to the file "
+                "that you want to serve as your SPA entry."
+            )
+
         return config
 
 
@@ -398,8 +418,10 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
         config.providers array which we'll use later on to dynamically
         populate all social login configurations.
         """
-        if 'socialProviders' not in config:
-            config['socialProviders'] = {}
+        if 'web' not in config:
+            config['web'] = {}
+        if 'social' not in config['web']:
+            config['web']['social'] = {}
 
         for account_store_mapping in application.account_store_mappings:
             # Iterate directories
@@ -421,13 +443,12 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
                     to_camel_case(k): v for k, v in remote_provider.items()
                 }
 
-                local_provider = config['socialProviders'].get(provider_id, {})
-                if 'callbackUri' not in local_provider:
-                    local_provider['callbackUri'] = \
-                        '/callbacks/%s' % provider_id
+                local_provider = config['web']['social'].get(provider_id, {})
+                if 'uri' not in local_provider:
+                    local_provider['uri'] = '/callbacks/%s' % provider_id
 
                 _extend_dict(local_provider, remote_provider)
-                config['socialProviders'][provider_id] = local_provider
+                config['web']['social'][provider_id] = local_provider
 
     def _resolve_directory(self, application):
         # Finds and returns an Application's default Account Store
@@ -488,5 +509,30 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
             self._enrich_with_social_providers(config, application)
             directory = self._resolve_directory(application)
             self._enrich_with_directory_policies(config, directory)
+
+        return config
+
+
+class DebugConfigStrategy(object):
+    """Represents a strategy that when used dumps the config to the
+    provided logger.
+    """
+    def __init__(self, logger=None, section=None):
+        self.section = section
+        if logger is None:
+            self.log = log
+        else:
+            self.log = logging.getLogger(logger)
+
+    def process(self, config):
+        message = ''
+        if self.section is not None:
+            message = '%s:\n' % self.section
+
+        message = "%s%s\n" % (
+            message,
+            json.dumps(
+                config, sort_keys=True, indent=4, separators=(',', ': ')))
+        self.log.debug(message)
 
         return config

@@ -43,7 +43,7 @@ class TestDepCommand(BaseCommand):
     description = "install test dependencies"
 
     def run(self):
-        cmd = ["pip", "install", "pytest", "pytest-cov", "stormpath"]
+        cmd = ["pip", "install", "pytest", "pytest-cov", "stormpath", "mock"]
         ret = subprocess.call(cmd)
         sys.exit(ret)
 

@@ -10,8 +10,15 @@ class ConfigLoader(object):
         performed after load and post processing strategies are
         finished.
     """
-    def __init__(self, load_strategies, post_processing_strategies,
-                 validation_strategies):
+    def __init__(self, load_strategies=None, post_processing_strategies=None,
+                 validation_strategies=None):
+        if load_strategies is None:
+            load_strategies = []
+        if post_processing_strategies is None:
+            post_processing_strategies = []
+        if validation_strategies is None:
+            validation_strategies = []
+
         self.load_strategies = load_strategies
         self.post_processing_strategies = post_processing_strategies
         self.validation_strategies = validation_strategies
