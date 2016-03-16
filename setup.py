@@ -1,27 +1,23 @@
-from setuptools import setup, find_packages, Command
-import sys
-import os
-import subprocess
+"""Python packaging stuff."""
 
+
+from os.path import abspath, dirname, join, normpath
+from subprocess import call
+from sys import exit, version_info
+
+from setuptools import setup, find_packages, Command
 from stormpath import __version__
 
 
-PY_VERSION = sys.version_info[:2]
+PY_VERSION = version_info[:2]
 
 
 class BaseCommand(Command):
     user_options = []
 
     def pytest(self, *args):
-        ret = subprocess.call(
-            [
-                "py.test",
-                "--quiet",
-                "--cov-report=term-missing",
-                "--cov",
-                "stormpath_config"
-            ] + list(args))
-        sys.exit(ret)
+        ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'] + list(args))
+        exit(ret)
 
     def initialize_options(self):
         pass
@@ -38,34 +34,6 @@ class TestCommand(BaseCommand):
         self.pytest('tests')
 
 
-class TestDepCommand(BaseCommand):
-
-    description = "install test dependencies"
-
-    def run(self):
-        cmd = ["pip", "install", "pytest", "pytest-cov", "stormpath", "mock"]
-        ret = subprocess.call(cmd)
-        sys.exit(ret)
-
-
-class DocCommand(BaseCommand):
-
-    description = "generate documentation"
-
-    def run(self):
-        try:
-            os.chdir('docs')
-            ret = os.system('make html')
-            sys.exit(ret)
-        except OSError as e:
-            print(e)
-            sys.exit(-1)
-
-# To install the stormpath library, open a Terminal shell, then run this
-# file by typing:
-#
-# python setup.py install
-
 setup(
     name = 'stormpath-config',
     version = __version__,
@@ -79,6 +47,9 @@ setup(
         'flatdict>=1.2.0',
         'pyyaml>=3.11',
     ],
+    extras_require = {
+        'test': ['pytest', 'pytest-cov', 'stormpath', 'mock'],
+    },
     packages = find_packages(exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),
     classifiers = [
         'Development Status :: 5 - Production/Stable',
@@ -98,21 +69,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Libraries',
     ],
-    cmdclass = {
-        'test': TestCommand,
-        'testdep': TestDepCommand,
-        'docs': DocCommand,
-    },
-    long_description="""\
-    Stormpath SDK
-    -------------
-    DESCRIPTION
-    The Stormpath Python Config is responsible for loading the Stormpath
-    configuration. It is an internal module used by stormpath-python-sdk,
-    stormpath-django, stormpath-flask, and is not meant for general
-    consumption.
-    LICENSE
-    The Stormpath Python Config is distributed under the Apache Software
-    License.
-    """,
+    cmdclass = {'test': TestCommand},
+    long_description = open(normpath(join(dirname(abspath(__file__)), 'README.rst'))).read(),
 )
