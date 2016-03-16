@@ -3,13 +3,9 @@
 
 from os.path import abspath, dirname, join, normpath
 from subprocess import call
-from sys import exit, version_info
+from sys import exit
 
 from setuptools import setup, find_packages, Command
-from stormpath import __version__
-
-
-PY_VERSION = version_info[:2]
 
 
 class BaseCommand(Command):
@@ -36,7 +32,7 @@ class TestCommand(BaseCommand):
 
 setup(
     name = 'stormpath-config',
-    version = __version__,
+    version = '0.0.1',
     description = 'Official Stormpath library, used for loading the Stormpath configuration.',
     author = 'Stormpath, Inc.',
     author_email = 'support@stormpath.com',
