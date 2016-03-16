@@ -76,6 +76,7 @@ Now, once you have your new ``ConfigLoader`` object, all you need to do is call
 the ``load()`` method to load all configuration data.  You can do this like so:
 
 .. code-block:: python
+
     config = config_loader.load()
     print(config)
 
