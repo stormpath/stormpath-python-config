@@ -39,7 +39,7 @@ setup(
     version = __version__,
     description = 'Official Stormpath library, used for loading the Stormpath configuration.',
     author = 'Stormpath, Inc.',
-    author_email = 'python@stormpath.com',
+    author_email = 'support@stormpath.com',
     url = 'https://github.com/stormpath/stormpath-python-config',
     zip_safe = False,
     keywords = ['stormpath', 'configuration'],
