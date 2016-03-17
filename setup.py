@@ -22,7 +22,7 @@ class TestCommand(BaseCommand):
     description = "run self-tests"
 
     def run(self):
-        ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'] + list(args))
+        ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'])
         exit(ret)
 
 
