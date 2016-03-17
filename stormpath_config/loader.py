@@ -1,3 +1,5 @@
+"""Configuration Loader."""
+
 
 class ConfigLoader(object):
     """Represents a configuration loader that loads a configuration
@@ -10,12 +12,13 @@ class ConfigLoader(object):
         performed after load and post processing strategies are
         finished.
     """
-    def __init__(self, load_strategies=None, post_processing_strategies=None,
-                 validation_strategies=None):
+    def __init__(self, load_strategies=None, post_processing_strategies=None, validation_strategies=None):
         if load_strategies is None:
             load_strategies = []
+
         if post_processing_strategies is None:
             post_processing_strategies = []
+
         if validation_strategies is None:
             validation_strategies = []
 
@@ -28,6 +31,7 @@ class ConfigLoader(object):
 
         for strategy in self.load_strategies:
             config = strategy.process(config)
+
             for strategy in self.post_processing_strategies:
                 config = strategy.process(config)
 
