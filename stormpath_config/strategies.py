@@ -1,3 +1,7 @@
+from codecs import open as copen
+
+from pyjavaproperties import Properties
+
 import codecs
 import datetime
 import flatdict
@@ -8,26 +12,6 @@ import yaml
 
 
 log = logging.getLogger(__name__)
-
-
-def _load_properties(fname):
-    props = {}
-    if not fname or not os.path.isfile(fname):
-        return props
-
-    try:
-        with codecs.open(fname, 'r', encoding='utf-8') as fd:
-            for line in fd:
-                line = line.strip()
-                if line.startswith('#') or '=' not in line:
-                    continue
-
-                k, v = line.split('=', 1)
-                props[k.strip()] = v.strip()
-
-        return props
-    except UnicodeDecodeError:
-        return {}
 
 
 def _extend_dict(original, extend_with):
@@ -101,22 +85,23 @@ class LoadAPIKeyConfigStrategy(LoadFilePathStrategy):
     file into the configuration.
     """
     def _process_file_path(self, config):
+        props = Properties()
+
         try:
-            properties_config = _load_properties(self.file_path)
-        except Exception as e:
-            raise Exception(
-                "Error parsing config %s.\nDetails: %s" % (
-                    self.file_path, e.message))
+            with copen(self.file_path, encoding='utf-8') as fd:
+                props.load(fd)
+                return dict(props)
+        except Exception as err:
+            raise Exception('Error parsing properties file: %s.\nDetails: %s' % (self.file_path, err.message))
 
-        if not self.must_exist and len(properties_config.items()) == 0:
-          return config
+        if not self.must_exist and len(props.keys()) == 0:
+            return config
 
-        api_key_id = properties_config.get('apiKey.id')
-        api_key_secret = properties_config.get('apiKey.secret')
+        api_key_id = props['apiKey.id']
+        api_key_secret = props['apiKey.secret']
 
         if not (api_key_id and api_key_secret):
-          raise Exception(
-              'Unable to read properties file: %s' % self.file_path)
+            raise Exception('Unable to read properties file: %s' % self.file_path)
 
         config.setdefault('client', {})
         config['client'].setdefault('apiKey', {})
@@ -238,9 +223,7 @@ class ValidateClientConfigStrategy(object):
 
         href = application.get('href')
         if href and '/applications/' not in href:
-            raise ValueError(
-                'Application HREF %s is not a valid Stormpath Application '
-                'HREF.' % href)
+            raise ValueError('Application HREF %s is not a valid Stormpath Application HREF.' % href)
 
         web_spa = config.get('web', {}).get('spa', {})
         if web_spa and web_spa.get('enabled') and web_spa.get('view') is None:
