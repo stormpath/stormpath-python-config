@@ -10,10 +10,6 @@ from setuptools import setup, find_packages, Command
 class BaseCommand(Command):
     user_options = []
 
-    def pytest(self, *args):
-        ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'] + list(args))
-        exit(ret)
-
     def initialize_options(self):
         pass
 
@@ -26,7 +22,8 @@ class TestCommand(BaseCommand):
     description = "run self-tests"
 
     def run(self):
-        self.pytest('tests')
+        ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'] + list(args))
+        exit(ret)
 
 
 setup(
