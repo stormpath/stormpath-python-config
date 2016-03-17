@@ -3,7 +3,6 @@
 
 from os.path import abspath, dirname, join, normpath
 from subprocess import call
-from sys import exit
 
 from setuptools import setup, find_packages, Command
 
