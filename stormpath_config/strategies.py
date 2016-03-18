@@ -88,9 +88,7 @@ class LoadFileConfigStrategy(LoadFilePathStrategy):
         try:
             loaded_config = yaml.load(f.read())
         except Exception as e:
-            raise Exception(
-                "Error parsing file %s.\nDetails: %s" % (
-                    self.file_path, e.message))
+            raise Exception('Error parsing file "%s".\nDetails: %s' % (self.file_path, e.message))
 
         return _extend_dict(config, loaded_config)
 
@@ -103,19 +101,16 @@ class LoadAPIKeyConfigStrategy(LoadFilePathStrategy):
         try:
             properties_config = _load_properties(self.file_path)
         except Exception as e:
-            raise Exception(
-                "Error parsing config %s.\nDetails: %s" % (
-                    self.file_path, e.message))
+            raise Exception('Error parsing config "%s".\nDetails: %s' % (self.file_path, e.message))
 
         if not self.must_exist and len(properties_config.items()) == 0:
-          return config
+            return config
 
         api_key_id = properties_config.get('apiKey.id')
         api_key_secret = properties_config.get('apiKey.secret')
 
         if not (api_key_id and api_key_secret):
-          raise Exception(
-              'Unable to read properties file: %s' % self.file_path)
+            raise Exception('Unable to read properties file: "%s"' % self.file_path)
 
         config.setdefault('client', {})
         config['client'].setdefault('apiKey', {})
@@ -134,10 +129,7 @@ class LoadEnvConfigStrategy(object):
 
     def __init__(self, prefix, aliases=None):
         self.prefix = prefix
-
-        if aliases is None:
-            aliases = {}
-        self.aliases = aliases
+        self.aliases = aliases if aliases is not None else {}
 
     def process(self, config=None):
         if config is None:
@@ -150,13 +142,16 @@ class LoadEnvConfigStrategy(object):
             env_key = '_'.join([self.prefix, key.upper()])
             env_key = self.aliases.get(env_key, env_key)
             value = os.environ.get(env_key)
+
             if value:
                 if isinstance(config[key], int):
                     value = int(value)
-                environ_config[key] = value
-        _extend_dict(config, environ_config)
 
+                environ_config[key] = value
+
+        _extend_dict(config, environ_config)
         config = config.as_dict()
+
         return config
 
 
@@ -229,7 +224,7 @@ class ValidateClientConfigStrategy(object):
             raise ValueError('API key cannot be empty.')
 
         if not apiKey.get('id') or not apiKey.get('secret'):
-            raise ValueError('API key ID and secret is required.')
+            raise ValueError('API key ID and secret are required.')
 
         application = config.get('application')
         if not application:
@@ -237,17 +232,13 @@ class ValidateClientConfigStrategy(object):
 
         href = application.get('href')
         if href and '/applications/' not in href:
-            raise ValueError(
-                'Application HREF %s is not a valid Stormpath Application '
-                'HREF.' % href)
+            raise ValueError('Application HREF "%s" is not a valid Stormpath Application HREF.' % href)
 
         web_spa = config.get('web', {}).get('spa', {})
         if web_spa and web_spa.get('enabled') and web_spa.get('view') is None:
-            raise ValueError(
-                "SPA mode is enabled but stormpath.web.spa.view isn't "
-                "set. This needs to be the absolute path to the file "
-                "that you want to serve as your SPA entry."
-            )
+            raise ValueError('SPA mode is enabled but stormpath.web.spa.view isn\'t '
+                'set. This needs to be the absolute path to the file '
+                'that you want to serve as your SPA entry.')
 
         return config
 
@@ -267,13 +258,11 @@ class EnrichClientFromRemoteConfigStrategy(object):
             app.name
         except Exception as e:
             if hasattr(e, 'status') and e.status == 404:
-                raise Exception(
-                    'The provided application could not be found. '
-                    'The provided application href was: %s' % href)
-            raise Exception(
-                'Exception was raised while trying to resolve an application. '
-                'The provided application href was: %s. '
-                'Exception message was: %s' % (href, e.message))
+                raise Exception('The provided application could not be found.  The provided application href was: "%s".' % href)
+
+            raise Exception('Exception was raised while trying to resolve an application. '
+                'The provided application href was: "%s". '
+                'Exception message was: "%s".' % (href, e.message))
 
         config['application']['name'] = app.name
         return app
@@ -285,14 +274,12 @@ class EnrichClientFromRemoteConfigStrategy(object):
         try:
             app = client.applications.query(name=name)[0]
         except IndexError:
-            raise Exception(
-                'The provided application could not be found. '
-                'The provided application name was: %s' % name)
+            raise Exception('The provided application could not be found. '
+                'The provided application name was: "%s".' % name)
         except Exception as e:
-            raise Exception(
-                'Exception was raised while trying to resolve an application. '
-                'The provided application name was: %s. '
-                'Exception message was: %s' % (name, e.message))
+            raise Exception('Exception was raised while trying to resolve an application. '
+                'The provided application name was: "%s". '
+                'Exception message was: "%s".' % (name, e.message))
 
         config['application']['href'] = app.href
         return app
@@ -312,6 +299,7 @@ class EnrichClientFromRemoteConfigStrategy(object):
                 # resolve any of them as default application.
                 if default_app is not None:
                     raise Exception(message)
+
                 default_app = app
 
         if default_app is None:
@@ -319,6 +307,7 @@ class EnrichClientFromRemoteConfigStrategy(object):
 
         config['application']['name'] = default_app.name
         config['application']['href'] = default_app.href
+
         return default_app
 
     def process(self, config):
@@ -407,8 +396,10 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
         for k, v in dict(application.oauth_policy).items():
             if isinstance(v, datetime.timedelta):
                 v = v.total_seconds()
+
             if k not in ['created_at', 'modified_at']:
                 oauth_policy_dict[to_camel_case(k)] = v
+
         config['application']['oAuthPolicy'] = oauth_policy_dict
 
     def _enrich_with_social_providers(self, config, application):
@@ -419,6 +410,7 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
         """
         if 'web' not in config:
             config['web'] = {}
+
         if 'social' not in config['web']:
             config['web']['social'] = {}
 
@@ -437,10 +429,9 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
                 del remote_provider['href']
                 del remote_provider['created_at']
                 del remote_provider['modified_at']
+
                 remote_provider['enabled'] = True
-                remote_provider = {
-                    to_camel_case(k): v for k, v in remote_provider.items()
-                }
+                remote_provider = {to_camel_case(k): v for k, v in remote_provider.items()}
 
                 local_provider = config['web']['social'].get(provider_id, {})
                 if 'uri' not in local_provider:
@@ -530,8 +521,7 @@ class DebugConfigStrategy(object):
 
         message = "%s%s\n" % (
             message,
-            json.dumps(
-                config, sort_keys=True, indent=4, separators=(',', ': ')))
+            json.dumps(config, sort_keys=True, indent=4, separators=(',', ': ')))
         self.log.debug(message)
 
         return config
