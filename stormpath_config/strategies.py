@@ -66,15 +66,14 @@ class LoadFilePathStrategy(object):
 
         if self.file_path.startswith('~'):
             if self.must_exist:
-                raise Exception(
-                    'Unable to load "%s" . Environment home not set.' %
-                    self.file_path)
+                raise Exception('Unable to load "%s". Environment home not set.' % self.file_path)
+
             return config
 
         if not os.path.exists(self.file_path):
             if self.must_exist:
-                raise Exception(
-                    "Config file '" + self.file_path + "' doesn't exist.")
+                raise Exception('Config file "' + self.file_path + '" doesn\'t exist.')
+
             return config
 
         return self._process_file_path(config)

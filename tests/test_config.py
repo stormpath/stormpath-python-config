@@ -106,9 +106,7 @@ class LoadAPIKeyConfigStrategyTest(TestCase):
             try:
                 lapcs.process()
             except Exception as e:
-                self.assertEqual(
-                    str(e),
-                    'Unable to load "%s" . Environment home not set.' % path)
+                self.assertEqual(str(e), 'Unable to load "%s". Environment home not set.' % path)
             else:
                 self.fail(
                     "Loading config without environment home didn't throw any "
