@@ -2,7 +2,6 @@ from codecs import open as copen
 
 from pyjavaproperties import Properties
 
-import codecs
 import datetime
 import flatdict
 import json
