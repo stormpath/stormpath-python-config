@@ -98,8 +98,7 @@ class Application(DictMixin):
     def __init__(self, name, href):
         self.name = name
         self.href = href
-        self.account_store_mappings = AccountStoreMappings(
-            [AccountStoreMapping()])
+        self.account_store_mappings = AccountStoreMappings([AccountStoreMapping()])
         self.oauth_policy = OauthPolicy()
         self.default_account_store_mapping = AccountStoreMapping()
 
@@ -113,7 +112,7 @@ class Applications(object):
             if app.href == href:
                 return app
 
-        raise StormpathError("I don't exist", http_status=404)
+        raise StormpathError('I don\'t exist.', http_status=404)
 
     def query(self, name):
         for app in self.apps:
