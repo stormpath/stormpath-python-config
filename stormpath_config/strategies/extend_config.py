@@ -1,4 +1,4 @@
-from .helpers import _extend_dict
+from ..helpers import _extend_dict
 
 
 class ExtendConfigStrategy(object):

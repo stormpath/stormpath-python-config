@@ -2,7 +2,7 @@ from os import environ
 
 from flatdict import FlatDict
 
-from .helpers import _extend_dict
+from ..helpers import _extend_dict
 
 
 class LoadEnvConfigStrategy(object):

@@ -1,3 +1,6 @@
+"""Helper functions that this package relies upon."""
+
+
 from codecs import open as copen
 from os.path import isfile
 

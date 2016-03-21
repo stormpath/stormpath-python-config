@@ -1,4 +1,4 @@
-from .helpers import _load_properties
+from ..helpers import _load_properties
 from .load_file_path import LoadFilePathStrategy
 
 

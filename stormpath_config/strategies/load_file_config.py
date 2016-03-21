@@ -1,6 +1,6 @@
 from yaml import load
 
-from .helpers import _extend_dict
+from ..helpers import _extend_dict
 from .load_file_path import LoadFilePathStrategy
 
 

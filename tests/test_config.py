@@ -8,7 +8,7 @@ from logging import getLogger
 from .base import *
 from stormpath_config.loader import ConfigLoader
 from stormpath_config.strategies import *
-from stormpath_config.strategies.helpers import _extend_dict
+from stormpath_config.helpers import _extend_dict
 
 
 class ExtendDictTest(TestCase):

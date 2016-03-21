@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from .helpers import _extend_dict, to_camel_case
+from ..helpers import _extend_dict, to_camel_case
 
 
 class EnrichIntegrationFromRemoteConfigStrategy(object):
