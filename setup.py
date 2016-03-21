@@ -42,7 +42,7 @@ setup(
         'pyyaml>=3.11',
     ],
     extras_require = {
-        'test': ['pytest', 'pytest-cov', 'stormpath', 'mock'],
+        'test': ['pytest', 'pytest-cov', 'python-coveralls', 'stormpath', 'mock'],
     },
     packages = find_packages(exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),
     classifiers = [
