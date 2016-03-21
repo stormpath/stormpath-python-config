@@ -2,15 +2,15 @@
 
 
 class ConfigLoader(object):
-    """Represents a configuration loader that loads a configuration
-    through a list of strategies.
+    """
+    Represents a configuration loader that loads configuration through a list
+    of strategies.
 
-    :param load_strategies: List of strategies that load config
-    :param post_processing_strategies: List of strategies that will be
-        performed after each load strategy.
-    :param validation_strategies: List of strategies that will be
-        performed after load and post processing strategies are
-        finished.
+    :param list load_strategies: List of Strategies that load configuration data.
+    :param post_processing_strategies: List of Strategies that will be performed
+        after each load strategy.
+    :param validation_strategies: List of strategies that will be performed after
+        the load and post processing strategies are finished.
     """
     def __init__(self, load_strategies=None, post_processing_strategies=None, validation_strategies=None):
         if load_strategies is None:
