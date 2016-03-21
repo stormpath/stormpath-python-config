@@ -3,6 +3,8 @@ import os
 from unittest import TestCase
 from path import Path
 
+from logging import getLogger
+
 from .base import *
 from stormpath_config.loader import ConfigLoader
 from stormpath_config.strategies import *
@@ -599,7 +601,7 @@ class EnrichIntegrationFromRemoteConfigStrategyTest(TestCase):
 
 class DebugConfigStrategyTest(TestCase):
     def test_debug_config_strategy(self):
-        with mock.patch('stormpath_config.strategies.log') as log_mock:
+        with mock.patch('stormpath_config.strategies.debug_config.log') as log_mock:
             dcs = DebugConfigStrategy(section='test')
             config = dcs.process({'abc': '123'})
 
@@ -607,7 +609,7 @@ class DebugConfigStrategyTest(TestCase):
             self.assertEqual(config, {'abc': '123'})
 
     def test_debug_config_strategy_without_section(self):
-        with mock.patch('stormpath_config.strategies.log') as log_mock:
+        with mock.patch('stormpath_config.strategies.debug_config.log') as log_mock:
             dcs = DebugConfigStrategy()
             config = dcs.process({'abc': '123'})
 
@@ -615,7 +617,7 @@ class DebugConfigStrategyTest(TestCase):
             self.assertEqual(config, {'abc': '123'})
 
     def test_debug_config_strategy_with_custom_logger(self):
-        logger = logging.getLogger('my.custom.logger')
+        logger = getLogger('my.custom.logger')
         with mock.patch.object(logger, 'debug') as mock_debug:
             dcs = DebugConfigStrategy(logger='my.custom.logger', section='sec')
             config = dcs.process({'abc': '123'})
