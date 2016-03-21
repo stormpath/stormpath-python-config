@@ -1,10 +1,14 @@
+from codecs import open as copen
+from os.path import isfile
+
+
 def _load_properties(fname):
     props = {}
-    if not fname or not os.path.isfile(fname):
+    if not fname or not isfile(fname):
         return props
 
     try:
-        with codecs.open(fname, 'r', encoding='utf-8') as fd:
+        with copen(fname, 'r', encoding='utf-8') as fd:
             for line in fd:
                 line = line.strip()
                 if line.startswith('#') or '=' not in line:
