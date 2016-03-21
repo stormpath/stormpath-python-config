@@ -184,25 +184,6 @@ class LoadAPIKeyFromConfigStrategy(object):
         return config
 
 
-class MoveAPIKeyToClientAPIKeyStrategy(object):
-    """Represents a strategy that moves an API key from apiKey to
-    client.apiKey.
-    """
-    def process(self, config=None):
-        if config is None:
-            config = {}
-
-        apiKey = config.get('apiKey', {})
-
-        if apiKey:
-            config.setdefault('client', {})
-            config['client'].setdefault('apiKey', {})
-            config['client']['apiKey'] = apiKey
-            del config['apiKey']
-
-        return config
-
-
 class ValidateClientConfigStrategy(object):
     """Represents a strategy that validates the configuration
     (post loading).

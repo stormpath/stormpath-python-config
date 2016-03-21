@@ -190,9 +190,11 @@ class ConfigLoaderTest(TestCase):
                 'name': 'CLIENT_CONFIG_APP',
                 'href': None
             },
-            'apiKey': {
-                'id': 'CLIENT_CONFIG_API_KEY_ID',
-                'secret': 'CLIENT_CONFIG_API_KEY_SECRET',
+            'client': {
+                'apiKey': {
+                    'id': 'CLIENT_CONFIG_API_KEY_ID',
+                    'secret': 'CLIENT_CONFIG_API_KEY_SECRET',
+                }
             }
         }
 
@@ -226,10 +228,6 @@ class ConfigLoaderTest(TestCase):
             # empty, then a apiKey.properties file should be loaded
             # from that path.
             LoadAPIKeyFromConfigStrategy(),
-
-            # Post-processing: If an apiKey key is set, then this key
-            # should be mapped to the key client.apiKey.
-            MoveAPIKeyToClientAPIKeyStrategy()
         ]
         self.validation_strategies = [
             # Post-processing: Validation
@@ -276,10 +274,7 @@ class EdgeCasesTest(TestCase):
             #    constructor.
             ExtendConfigStrategy(extend_with=client_config)
         ]
-        post_processing_strategies = [
-            LoadAPIKeyFromConfigStrategy(),
-            MoveAPIKeyToClientAPIKeyStrategy()
-        ]
+        post_processing_strategies = [LoadAPIKeyFromConfigStrategy()]
         validation_strategies = [ValidateClientConfigStrategy()]
 
         cl = ConfigLoader(load_strategies, post_processing_strategies, validation_strategies)
@@ -310,10 +305,7 @@ class EdgeCasesTest(TestCase):
             LoadEnvConfigStrategy(prefix='STORMPATH'),
             ExtendConfigStrategy(extend_with={})
         ]
-        post_processing_strategies = [
-            LoadAPIKeyFromConfigStrategy(),
-            MoveAPIKeyToClientAPIKeyStrategy()
-        ]
+        post_processing_strategies = [LoadAPIKeyFromConfigStrategy()]
         validation_strategies = [ValidateClientConfigStrategy()]
 
         cl = ConfigLoader(load_strategies, post_processing_strategies, validation_strategies)
@@ -348,10 +340,7 @@ class EdgeCasesTest(TestCase):
             #    constructor.
             ExtendConfigStrategy(extend_with=client_config)
         ]
-        post_processing_strategies = [
-            LoadAPIKeyFromConfigStrategy(),
-            MoveAPIKeyToClientAPIKeyStrategy(),
-        ]
+        post_processing_strategies = [LoadAPIKeyFromConfigStrategy()]
         validation_strategies = [ValidateClientConfigStrategy()]
 
         cl = ConfigLoader(load_strategies, post_processing_strategies, validation_strategies)
