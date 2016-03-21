@@ -1,3 +1,6 @@
+"""Tests for the ConfigLoader class."""
+
+
 from os import environ
 from unittest import TestCase
 
@@ -62,6 +65,10 @@ class ConfigLoaderTest(TestCase):
             # Post-processing: Validation
             ValidateClientConfigStrategy()
         ]
+
+    def test_empty_config_loader(self):
+        cl = ConfigLoader()
+        self.assertEqual(len(cl.load().keys()), 0)
 
     @patch.dict(environ, {
         'STORMPATH_CLIENT_APIKEY_ID': 'env api key id',
