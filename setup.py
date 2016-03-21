@@ -37,6 +37,7 @@ setup(
     keywords = ['stormpath', 'configuration'],
     install_requires = [
         'flatdict>=1.2.0',
+        'path.py==8.1.2',
         'pyjavaproperties==0.6',
         'pyyaml>=3.11',
     ],
