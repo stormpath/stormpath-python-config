@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import yaml
+from path import Path
 
 
 log = logging.getLogger(__name__)
@@ -54,7 +55,8 @@ class LoadFilePathStrategy(object):
     file.
     """
     def __init__(self, file_path, must_exist=False):
-        self.file_path = os.path.expanduser(file_path)
+        self._file_path = Path(file_path).expand()
+        self.file_path = self._file_path.abspath()
         self.must_exist = must_exist
 
     def _process_file_path(self, config):
@@ -70,7 +72,7 @@ class LoadFilePathStrategy(object):
 
             return config
 
-        if not os.path.exists(self.file_path):
+        if not self._file_path.exists():
             if self.must_exist:
                 raise Exception('Config file "' + self.file_path + '" doesn\'t exist.')
 

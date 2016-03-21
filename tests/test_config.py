@@ -1,6 +1,7 @@
 import mock
 import os
 from unittest import TestCase
+from path import Path
 
 from .base import *
 from stormpath_config.loader import ConfigLoader
@@ -93,7 +94,7 @@ class LoadAPIKeyConfigStrategyTest(TestCase):
     def test_load_empty_api_key_config_must_exist_no_home_env(self):
         path = '~/tests/assets/empty_apiKey.properties'
 
-        with mock.patch('os.path.expanduser', mock.MagicMock(return_value=path)):
+        with mock.patch.object(Path, 'abspath', return_value=path):
             lapcs = LoadAPIKeyConfigStrategy(path, must_exist=True)
             try:
                 lapcs.process()
