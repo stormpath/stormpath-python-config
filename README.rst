@@ -17,6 +17,10 @@ stormpath-python-config
     :alt: stormpath-python-config Build
     :target: https://travis-ci.org/stormpath/stormpath-python-config
 
+.. image:: https://coveralls.io/repos/github/stormpath/stormpath-python-config/badge.svg?branch=master
+    :alt: stormpath-python-config Coverage
+    :target: https://coveralls.io/github/stormpath/stormpath-python-config?branch=master
+
 *Stormpath configuration loader.*
 
 .. note::
