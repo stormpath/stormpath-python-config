@@ -5,8 +5,14 @@ from .. import log
 
 
 class DebugConfigStrategy(object):
-    """Represents a strategy that when used dumps the config to the
+    """
+    A simple strategy that dumps the Stormpath configuration data to the
     provided logger.
+
+    This can be used to help debug configuration problems.
+
+    If no logger is supplied, the 'python-config' logger will be used by
+    default.
     """
     def __init__(self, logger=None, section=None):
         self.section = section
