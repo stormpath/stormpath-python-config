@@ -23,6 +23,8 @@ class TestCommand(BaseCommand):
 
     def run(self):
         ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'])
+        call(['coverage', 'xml'])
+        call(['python-codacy-coverage', '-r', 'coverage.xml'])
         exit(ret)
 
 
@@ -42,7 +44,7 @@ setup(
         'pyyaml>=3.11',
     ],
     extras_require = {
-        'test': ['pytest', 'pytest-cov', 'python-coveralls', 'stormpath', 'mock'],
+        'test': ['codacy-coverage', 'mock', 'pytest', 'pytest-cov', 'python-coveralls', 'stormpath'],
     },
     packages = find_packages(exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),
     classifiers = [
