@@ -46,6 +46,28 @@ def _enrich_with_oauth_policy(application, config):
     return oauth_policy_dict
 
 
+def _resolve_directory(application):
+    """
+    Given a Stormpath Application, find and return the Application's default
+    Account Store, or None.
+
+    :param obj application: The Stormpath Application.
+    :rtype: obj or None
+    :returns: The Stormpath resource that is the Application's default Account
+        Store, or None.
+    """
+    try:
+        dac = application.default_account_store_mapping.account_store
+    except Exception:
+        return None
+
+    # If this account store is Group object, get its directory.
+    if hasattr(dac, 'directory'):
+        dac = dac.directory
+
+    return dac
+
+
 class EnrichIntegrationFromRemoteConfigStrategy(object):
     """Retrieves Stormpath settings from the API service, and ensures
     the local configuration object properly reflects these settings.
@@ -91,20 +113,6 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
                 _extend_dict(local_provider, remote_provider)
                 config['web']['social'][provider_id] = local_provider
 
-    def _resolve_directory(self, application):
-        # Finds and returns an Application's default Account Store
-        # (Directory) object. If one doesn't exist, nothing will
-        # be returned.
-        try:
-            dac = application.default_account_store_mapping.account_store
-        except Exception:
-            return None
-
-        # If this account store is Group object, get its' directory
-        if hasattr(dac, 'directory'):
-            dac = dac.directory
-
-        return dac
 
     def _enrich_with_directory_policies(self, config, directory):
         # Pulls down all of a Directory's configuration settings, and
@@ -148,7 +156,7 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
             application = _resolve_application(client, config)
             config['application']['oAuthPolicy'] = _enrich_with_oauth_policy(application, config)
             self._enrich_with_social_providers(config, application)
-            directory = self._resolve_directory(application)
+            directory = _resolve_directory(application)
             self._enrich_with_directory_policies(config, directory)
 
         return config
