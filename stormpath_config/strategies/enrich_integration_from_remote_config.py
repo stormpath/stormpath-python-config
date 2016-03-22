@@ -3,34 +3,55 @@ from datetime import timedelta
 from ..helpers import _extend_dict, to_camel_case
 
 
+def _resolve_application(client, config):
+    """
+    Given a Stormpath Client, and a fully populated Stormpath configuration,
+    find and retrieve the Stormpath Application.
+
+    :param obj client: The Stormpath Client object.
+    :param dict config: The fully populated Stormpath configuration.
+    :rtype: obj
+    :returns: The Stormpath Application that was specified in the configuration.
+    """
+    application = client.applications.get(config['application']['href'])
+    if not (application and hasattr(application, 'href') and
+            hasattr(application, 'account_store_mappings') and
+            hasattr(application, 'oauth_policy')):
+        raise Exception('Unable to resolve a Stormpath application.')
+
+    return application
+
+
+def _enrich_with_oauth_policy(application, config):
+    """
+    Given a Stormpath Application, and a fully populated Stormpath
+    configuration, find and retrieve the Stormpath Application's OAuth Policy
+    settings.
+
+    :param obj application: The Stormpath Application.
+    :param dict config: The fully populated Stormpath configuration.
+    :rtype: dict
+    :returns: The OAuth Policy rules for the given Stormpath Application as a
+        dict.
+    """
+    oauth_policy_dict = {}
+
+    for k, v in dict(application.oauth_policy).items():
+        if isinstance(v, timedelta):
+            v = v.total_seconds()
+
+        if k not in ['created_at', 'modified_at']:
+            oauth_policy_dict[to_camel_case(k)] = v
+
+    return oauth_policy_dict
+
+
 class EnrichIntegrationFromRemoteConfigStrategy(object):
     """Retrieves Stormpath settings from the API service, and ensures
     the local configuration object properly reflects these settings.
     """
     def __init__(self, client_factory):
         self.client_factory = client_factory
-
-    def _resolve_application(self, client, config):
-        application = client.applications.get(config['application']['href'])
-        if not (
-                application and hasattr(application, 'href') and
-                hasattr(application, 'account_store_mappings') and
-                hasattr(application, 'oauth_policy')):
-            raise Exception('Unable to resolve a Stormpath application.')
-
-        return application
-
-    def _enrich_with_oauth_policy(self, config, application):
-        # Returns the OAuth policy of the Stormpath Application.
-        oauth_policy_dict = {}
-        for k, v in dict(application.oauth_policy).items():
-            if isinstance(v, timedelta):
-                v = v.total_seconds()
-
-            if k not in ['created_at', 'modified_at']:
-                oauth_policy_dict[to_camel_case(k)] = v
-
-        config['application']['oAuthPolicy'] = oauth_policy_dict
 
     def _enrich_with_social_providers(self, config, application):
         """Iterate over all account stores on the given Application,
@@ -124,8 +145,8 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
         client = self.client_factory(config)
 
         if 'href' in config.get('application', {}):
-            application = self._resolve_application(client, config)
-            self._enrich_with_oauth_policy(config, application)
+            application = _resolve_application(client, config)
+            config['application']['oAuthPolicy'] = _enrich_with_oauth_policy(application, config)
             self._enrich_with_social_providers(config, application)
             directory = self._resolve_directory(application)
             self._enrich_with_directory_policies(config, directory)
