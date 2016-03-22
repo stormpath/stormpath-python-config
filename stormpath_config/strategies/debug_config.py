@@ -20,7 +20,6 @@ class DebugConfigStrategy(object):
         if self.section is not None:
             message = '%s:\n' % self.section
 
-
         message = "%s%s\n" % (message, dumps(config, sort_keys=True, indent=4, separators=(',', ': ')))
         self.log.debug(message)
 
