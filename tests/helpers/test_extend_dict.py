@@ -8,15 +8,15 @@ class ExtendDictTest(TestCase):
         original = {
             'a': 1,
             'b': {
-                "A": 1,
-                "B": 2
+                'A': 1,
+                'B': 2
             }
         }
 
         extend_with = {
             'b': {
-                "B": 3,
-                "C": 4
+                'B': 3,
+                'C': 4
             },
             'c': 3
         }
