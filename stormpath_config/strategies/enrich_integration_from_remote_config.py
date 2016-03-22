@@ -108,50 +108,59 @@ def _enrich_with_directory_policies(directory, config):
     }
 
 
+def _enrich_with_social_providers(application, config):
+    """
+    Given a Stormpath Application, and a fully populated Stormpath
+    configuration, find and retrieve the Stormpath Application's social
+    Directory configuration.
+
+    :param obj application: The Stormpath Application.
+    :param dict config: The fully populated Stormpath configuration.
+    :rtype: dict or None
+    :returns: The OAuth Policy rules for the given Stormpath Application as a
+        dict.
+    """
+    social_config = {
+        'web': {
+            'social': {}
+        }
+    }
+
+    for account_store_mapping in application.account_store_mappings:
+        # Iterate directories
+        if not hasattr(account_store_mapping.account_store, 'provider'):
+            continue
+
+        remote_provider = dict(account_store_mapping.account_store.provider)
+        provider_id = remote_provider['provider_id']
+
+        # If the provider isn't a Stormpath, AD, or LDAP directory
+        # it's a social directory.
+        if provider_id not in ['stormpath', 'ad', 'ldap']:
+            # Remove unnecessary properties that clutter our config.
+            del remote_provider['href']
+            del remote_provider['created_at']
+            del remote_provider['modified_at']
+
+            remote_provider['enabled'] = True
+            remote_provider = {to_camel_case(k): v for k, v in remote_provider.items()}
+
+            local_provider = social_config['web']['social'].get(provider_id, {})
+            if 'uri' not in local_provider:
+                local_provider['uri'] = '/callbacks/%s' % provider_id
+
+            _extend_dict(local_provider, remote_provider)
+            social_config['web']['social'][provider_id] = local_provider
+
+    return social_config
+
+
 class EnrichIntegrationFromRemoteConfigStrategy(object):
     """Retrieves Stormpath settings from the API service, and ensures
     the local configuration object properly reflects these settings.
     """
     def __init__(self, client_factory):
         self.client_factory = client_factory
-
-    def _enrich_with_social_providers(self, config, application):
-        """Iterate over all account stores on the given Application,
-        looking for all Social providers.  We'll then create a
-        config.providers array which we'll use later on to dynamically
-        populate all social login configurations.
-        """
-        if 'web' not in config:
-            config['web'] = {}
-
-        if 'social' not in config['web']:
-            config['web']['social'] = {}
-
-        for account_store_mapping in application.account_store_mappings:
-            # Iterate directories
-            if not hasattr(account_store_mapping.account_store, 'provider'):
-                continue
-
-            remote_provider = dict(account_store_mapping.account_store.provider)
-            provider_id = remote_provider['provider_id']
-
-            # If the provider isn't a Stormpath, AD, or LDAP directory
-            # it's a social directory.
-            if provider_id not in ['stormpath', 'ad', 'ldap']:
-                # Remove unnecessary properties that clutter our config.
-                del remote_provider['href']
-                del remote_provider['created_at']
-                del remote_provider['modified_at']
-
-                remote_provider['enabled'] = True
-                remote_provider = {to_camel_case(k): v for k, v in remote_provider.items()}
-
-                local_provider = config['web']['social'].get(provider_id, {})
-                if 'uri' not in local_provider:
-                    local_provider['uri'] = '/callbacks/%s' % provider_id
-
-                _extend_dict(local_provider, remote_provider)
-                config['web']['social'][provider_id] = local_provider
 
     def process(self, config):
         if config.get('skipRemoteConfig'):
@@ -162,7 +171,8 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
         if 'href' in config.get('application', {}):
             application = _resolve_application(client, config)
             config['application']['oAuthPolicy'] = _enrich_with_oauth_policy(application, config)
-            self._enrich_with_social_providers(config, application)
+            social_config = _enrich_with_social_providers(application, config)
+            _extend_dict(config, social_config)
             directory = _resolve_directory(application)
             policy_config = _enrich_with_directory_policies(directory, config)
             _extend_dict(config, policy_config)
