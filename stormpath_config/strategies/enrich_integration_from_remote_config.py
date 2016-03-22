@@ -68,6 +68,46 @@ def _resolve_directory(application):
     return dac
 
 
+def _enrich_with_directory_policies(directory, config):
+    """
+    Given a Stormpath Directory, and a fully populated Stormpath configuration,
+    find and retrieve the Stormpath Directory's Policies.
+
+    :param obj application: The Stormpath Application.
+    :param dict config: The fully populated Stormpath configuration.
+    :rtype: dict or None
+    :returns: The OAuth Policy rules for the given Stormpath Application as a
+        dict.
+    """
+    if not directory:
+        return None
+
+    def is_enabled(status):
+        return status == 'ENABLED'
+
+    # Enrich config with password policies
+    # Remove the href property from the Strength Resource, we don't
+    # want this to clutter up our nice passwordPolicy configuration
+    # dictionary!
+    strength = dict(directory.password_policy.strength)
+    del strength['href']
+    strength = {to_camel_case(k): v for k, v in strength.items()}
+
+    reset_email = is_enabled(directory.password_policy.reset_email_status)
+    ac_policy = directory.account_creation_policy
+
+    return {
+        'passwordPolicy': strength,
+        'web': {
+            'forgotPassword': {'enabled': reset_email},
+            'changePassword': {'enabled': reset_email},
+            'verifyEmail': {
+                'enabled': is_enabled(ac_policy.verification_email_status)
+            }
+        }
+    }
+
+
 class EnrichIntegrationFromRemoteConfigStrategy(object):
     """Retrieves Stormpath settings from the API service, and ensures
     the local configuration object properly reflects these settings.
@@ -113,39 +153,6 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
                 _extend_dict(local_provider, remote_provider)
                 config['web']['social'][provider_id] = local_provider
 
-
-    def _enrich_with_directory_policies(self, config, directory):
-        # Pulls down all of a Directory's configuration settings, and
-        # applies them to the local configuration.
-        if not directory:
-            return None
-
-        def is_enabled(status):
-            return status == 'ENABLED'
-
-        reset_email = is_enabled(directory.password_policy.reset_email_status)
-        ac_policy = directory.account_creation_policy
-        extend_with = {
-            'web': {
-                'forgotPassword': {'enabled': reset_email},
-                'changePassword': {'enabled': reset_email},
-                'verifyEmail': {
-                    'enabled': is_enabled(ac_policy.verification_email_status)
-                }
-            }
-        }
-        _extend_dict(config, extend_with)
-
-        # Enrich config with password policies
-        strength = dict(directory.password_policy.strength)
-
-        # Remove the href property from the Strength Resource, we don't
-        # want this to clutter up our nice passwordPolicy configuration
-        # dictionary!
-        del strength['href']
-        strength = {to_camel_case(k): v for k, v in strength.items()}
-        config['passwordPolicy'] = strength
-
     def process(self, config):
         if config.get('skipRemoteConfig'):
             return config
@@ -157,6 +164,7 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
             config['application']['oAuthPolicy'] = _enrich_with_oauth_policy(application, config)
             self._enrich_with_social_providers(config, application)
             directory = _resolve_directory(application)
-            self._enrich_with_directory_policies(config, directory)
+            policy_config = _enrich_with_directory_policies(directory, config)
+            _extend_dict(config, policy_config)
 
         return config
