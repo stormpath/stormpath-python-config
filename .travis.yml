@@ -8,7 +8,10 @@ python:
 - pypy
 install: pip install -e .[test]
 script: python setup.py test
-after_success: coveralls
+after_success:
+- coveralls
+- coverage xml
+- python-codacy-coverage -r coverage.xml
 env:
   global:
     secure: KHmG9+tjIlWmsR+cSOQtfIvGBgWGi107EqsBCkYdk8rfUs6iFAUIXqH80ErRIcB6FDongiI8QPOMAGwFZqQmKeY6f1RXh2ZBmqURUgzisFtwpgA8PsG1YDuUd3axlCeEpYwim27vbOnfrYY/QLaI2DjpU1xpuTrnWiLODexjJXuHWOzSsWsQCRckKQP4Gu+t87d8drzicZfpuN5+EOgAN/rnwKzDFuE3Qc+RJakATCZrMDaQsE8XnwXsVux6LXhqY4ScEf+YAXXKX/13svz/oZIAW5hkC3bffQ/VK4l/hwIW2YKxy3dbliOAjv6qKxHalOoM6bdT2sggXmJgHwzO6zIfU4+ZNDwSTwJZxGBw1GdO3beZbDKCtgRd+TxfzQ5qkVFQBAHJkhyiQ2McqRcsQQD/HYyWD9CCH5KvVjDeITF3gJT8Lmq5EdeLK0HkLFAojkGHvVCrRX+y8bUJD+jMYOavU3tyAMvP+scym4QkriaBQ+YdCWaXpXVH7ZqazMLp5lLn6nzsla0UGHmyUGasYOCwwmUm+fxFkW3kKRVOYpVPiVCB9DJcf130IdJTiI3TEzalDmKVYCizWlBBCkfCl8vWGwNYY81xApc6n5E2MGq5B6iKOhm2A/w8OPfTW/CHTNVRT1XkJKJ3VIrWRHjduLuopptcz9d3bJLslPvZeog=

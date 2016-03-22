@@ -23,8 +23,6 @@ class TestCommand(BaseCommand):
 
     def run(self):
         ret = call(['py.test', '--quiet', '--cov-report=term-missing', '--cov', 'stormpath_config'])
-        call(['coverage', 'xml'])
-        call(['python-codacy-coverage', '-r', 'coverage.xml'])
         exit(ret)
 
 
