@@ -5,7 +5,7 @@ from stormpath.resources.base import DictMixin
 
 class StormpathError(RuntimeError):
     def __init__(self, msg, http_status=None):
-        super(RuntimeError, self).__init__(msg)
+        super(StormpathError, self).__init__(msg)
         self.status = http_status
         self.message = msg
 
