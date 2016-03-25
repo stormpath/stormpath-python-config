@@ -172,9 +172,11 @@ class EnrichIntegrationFromRemoteConfigStrategy(object):
             application = _resolve_application(client, config)
             config['application']['oAuthPolicy'] = _enrich_with_oauth_policy(application, config)
             social_config = _enrich_with_social_providers(application, config)
-            _extend_dict(config, social_config)
+            if social_config:
+                _extend_dict(config, social_config)
             directory = _resolve_directory(application)
             policy_config = _enrich_with_directory_policies(directory, config)
-            _extend_dict(config, policy_config)
+            if policy_config:
+                _extend_dict(config, policy_config)
 
         return config
